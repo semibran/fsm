@@ -652,11 +652,15 @@ function snapNode(node) {
   }
 }
 
-window.onload = function () {
-  const root = document.getElementById('root')
-  patch(root, h('div', { id: 'root' }, [
+const view = () =>
+  h('div', { id: 'root' }, [
     h('header', {}, [
-      h('h1', {}, text('Finite State Machine Designer'))
+      h('h1', {}, text('Finite State Machine Designer')),
+      h('nav', { class: 'menu' }, [
+        h('a', {}, text('Hide text')),
+        h('a', {}, text('Download PNG')),
+        h('a', {}, text('Download SVG'))
+      ])
     ]),
     h('footer', {}, [
       h('ul', { class: 'instructions' }, [
@@ -675,16 +679,21 @@ window.onload = function () {
         h('li', {}, [h('strong', {}, text('Type greek letter:')),
           text(' put a backslash before it (like "\\beta")')])
       ])
-    ])
-  ]))
+    ]),
+    h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
+  ])
 
-  canvas = document.createElement('canvas')
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  root.appendChild(canvas)
+const render = () => {
+  const root = document.getElementById('root')
+  patch(root, view())
 
+  canvas = document.getElementById('canvas')
   restoreBackup();
   draw();
+}
+
+window.onload = function () {
+  render()
 
   canvas.onmousedown = function (e) {
     var mouse = crossBrowserRelativeMousePos(e);

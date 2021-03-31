@@ -39,7 +39,24 @@ footer {
   bottom: 0;
 }
 
-ul {
+nav a {
+  position: relative;
+  font-size: 0.875rem;
+  z-index: 1;
+}
+
+nav a:hover {
+  cursor: pointer;
+  color: blue;
+}
+
+nav a + a {
+  padding-left: 8px;
+  border-left: thin solid black;
+  margin-left: 8px;
+}
+
+.instructions {
   padding: 0.5rem 2rem;
   line-height: 1.5;
 }
