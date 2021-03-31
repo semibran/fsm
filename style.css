@@ -1,0 +1,98 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: 0;
+  box-sizing: border-box;
+  color: inherit;
+  font-family: Inter, sans-serif;
+  font-weight: normal;
+  font-size: inherit;
+}
+
+*, *::after, *::before {
+  box-sizing: inherit;
+}
+
+html {
+  -webkit-text-size-adjust: none;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  -webkit-font-smoothing: subpixel-antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+header, footer {
+  margin: 2rem;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+
+a:hover, button:hover, .button:hover {
+  text-decoration: dotted underline;
+}
+
+button:hover, .button:hover {
+  cursor: pointer;
+  color: blue;
+}
+
+input[type='file'] {
+  display: none;
+}
+
+.nav {
+  display: flex;
+  list-style: none;
+}
+
+.nav li, .disclaimer, .burger {
+  position: relative;
+  z-index: 1;
+}
+
+.nav a:not(:hover) {
+  color: black;
+}
+
+.nav, .disclaimer {
+  font-size: 0.875rem;
+}
+
+.nav li + li {
+  padding-left: 8px;
+  border-left: thin solid black;
+  margin-left: 8px;
+}
+
+.instructions {
+  padding: 0.5rem 2rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+strong {
+  font-weight: bold;
+}
