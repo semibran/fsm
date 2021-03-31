@@ -39,18 +39,27 @@ footer {
   bottom: 0;
 }
 
-nav a {
-  position: relative;
-  font-size: 0.875rem;
-  z-index: 1;
+a {
+  color: blue;
+  text-decoration: none;
 }
 
-nav a:hover {
+a:hover, button:hover {
+  text-decoration: dotted underline;
+}
+
+nav button, .disclaimer {
+  position: relative;
+  z-index: 1;
+  font-size: 0.875rem;
+}
+
+nav button:hover {
   cursor: pointer;
   color: blue;
 }
 
-nav a + a {
+nav button + button {
   padding-left: 8px;
   border-left: thin solid black;
   margin-left: 8px;
@@ -59,6 +68,7 @@ nav a + a {
 .instructions {
   padding: 0.5rem 2rem;
   line-height: 1.5;
+  margin-bottom: 0.5rem;
 }
 
 strong {

@@ -657,9 +657,9 @@ const view = () =>
     h('header', {}, [
       h('h1', {}, text('Finite State Machine Designer')),
       h('nav', { class: 'menu' }, [
-        h('a', {}, text('Hide text')),
-        h('a', {}, text('Download PNG')),
-        h('a', {}, text('Download SVG'))
+        h('button', {}, text('Hide text')),
+        h('button', {}, text('Download PNG')),
+        h('button', {}, text('Download SVG'))
       ])
     ]),
     h('footer', {}, [
@@ -678,6 +678,12 @@ const view = () =>
           text(' put an underscore before the number (like "S_0")')]),
         h('li', {}, [h('strong', {}, text('Type greek letter:')),
           text(' put a backslash before it (like "\\beta")')])
+      ]),
+      h('p', { class: 'disclaimer' }, [
+        text('FSM Designer modified from '),
+        h('a', { href: 'https://github.com/evanw/fsm', target: '_blank' }, text('evanw/fsm')),
+        text(' · © '),
+        h('a', { href: 'https://opensource.org/licenses/MIT', target: '_blank' }, text('MIT License'))
       ])
     ]),
     h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
