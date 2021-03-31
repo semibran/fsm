@@ -397,8 +397,6 @@ function restoreBackup() {
     return;
   }
 
-  console.log('restoring', localStorage.fsm)
-
   try {
     var backup = JSON.parse(localStorage['fsm']);
 
@@ -632,6 +630,8 @@ function drawUsing(c) {
 function draw() {
   drawUsing(canvas.getContext('2d'));
   saveBackup();
+  updateBlob(localStorage.fsm)
+  render(state)
 }
 
 function selectObject(x, y) {
@@ -662,21 +662,14 @@ function snapNode(node) {
   }
 }
 
-const state = {
-  hidden: false,
-  blob: null
-}
+let blob = null
+const state = { hidden: false }
 
 const ToggleText = (state) =>
   ({ ...state, hidden: !state.hidden })
 
-const UpdateBlob = (state, data) => {
-  const blob = new Blob([data], { type: 'application/json' })
-  return {
-    ...state,
-    blob: URL.createObjectURL(blob)
-  }
-}
+const updateBlob = (data) =>
+  blob = URL.createObjectURL(new Blob([data], { type: 'application/json' }))
 
 const download = (url, filename) => {
   const a = document.createElement('a')
@@ -719,12 +712,11 @@ const useJSON = (evt) => {
 
 const clearDiagram = () => {
   const ready = confirm('Are you sure you would like to clear the diagram? All unsaved changes will be lost.')
-  console.log(ready)
   if (!ready) return
   canvas.getContext('2d').clearRect(0, 0, window.innerWidth, window.innerHeight)
-  localStorage.fsm = ''
   nodes.length = 0
   links.length = 0
+  draw()
 }
 
 const view = (state) =>
@@ -733,7 +725,7 @@ const view = (state) =>
       h('h1', {}, text('Finite State Machine Designer')),
       h('ul', { class: 'nav' }, [
         h('li', {}, [
-          h('button', { onclick: () => render(ToggleText(state)) },
+          h('button', { onclick: () => render(Object.assign(state, ToggleText(state))) },
             state.hidden ? text('Show text') : text('Hide text'))
         ]),
         h('li', {}, [
@@ -750,7 +742,7 @@ const view = (state) =>
           }, text('Import JSON'))
         ]),
         h('li', {}, [
-          h('a', { href: state.blob, target: '_blank' }, text('View JSON'))
+          h('a', { href: blob, target: '_blank' }, text('View JSON'))
         ]),
         h('li', {}, [
           h('button', { onclick: exportSVG }, text('Export SVG'))
@@ -788,20 +780,20 @@ const view = (state) =>
   ])
 
 const render = (state) => {
-  state = UpdateBlob(state, localStorage.fsm)
-
   const root = document.getElementById('root')
   patch(root, view(state))
 
   canvas = document.getElementById('canvas')
-  draw();
-  window.onresize = () => render(state)
+  window.onresize = () => {
+    render(state)
+    draw()
+  }
 }
 
 window.onload = function () {
-  render(UpdateBlob(state, localStorage.fsm))
+  updateBlob(localStorage.fsm)
   restoreBackup();
-  draw();
+  render(state)
 
   canvas.onmousedown = function (e) {
     var mouse = crossBrowserRelativeMousePos(e);
