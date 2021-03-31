@@ -705,6 +705,8 @@ const importJSON = (evt) => {
 
 const useJSON = (evt) => {
   canvas.getContext('2d').clearRect(0, 0, window.innerWidth, window.innerHeight)
+  nodes.length = 0
+  links.length = 0
   localStorage.fsm = evt.target.result
   restoreBackup()
   draw()
