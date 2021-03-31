@@ -488,7 +488,9 @@ function saveBackup() {
     }
   }
 
-  localStorage['fsm'] = JSON.stringify(backup);
+  const data = JSON.stringify(backup)
+  render(UpdateBlob(state, data))
+  localStorage.fsm = data;
 }
 
 function det(a, b, c, d, e, f, g, h, i) {
@@ -660,11 +662,20 @@ function snapNode(node) {
 }
 
 const state = {
-  hidden: false
+  hidden: false,
+  blob: null
 }
 
 const ToggleText = (state) =>
   ({ ...state, hidden: !state.hidden })
+
+const UpdateBlob = (state, data) => {
+  const blob = new Blob([data], { type: 'application/json' })
+  return {
+    ...state,
+    blob: URL.createObjectURL(blob)
+  }
+}
 
 const view = (state) =>
   h('div', { id: 'root' }, [
@@ -676,14 +687,17 @@ const view = (state) =>
             state.hidden ? text('Show text') : text('Hide text'))
         ]),
         h('li', {}, [
-          h('button', {}, text('Export PNG'))
+          h('button', {}, text('Import JSON'))
+        ]),
+        h('li', {}, [
+          h('a', { href: state.blob, target: '_blank' }, text('Export JSON'))
         ]),
         h('li', {}, [
           h('button', {}, text('Export SVG'))
         ]),
-        h('li', {}, [
-          h('button', {}, text('Export JSON'))
-        ])
+        // h('li', {}, [
+        //   h('button', {}, text('Export PNG'))
+        // ])
       ])
     ]),
     !state.hidden && h('footer', {}, [
@@ -716,11 +730,13 @@ const view = (state) =>
 const render = (state) => {
   const root = document.getElementById('root')
   patch(root, view(state))
+
   canvas = document.getElementById('canvas')
+  window.onresize = () => render(state)
 }
 
 window.onload = function () {
-  render(state)
+  render(UpdateBlob(state, localStorage.fsm))
   restoreBackup();
   draw();
 

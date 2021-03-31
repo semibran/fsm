@@ -7,6 +7,7 @@
   color: inherit;
   font-family: Inter, sans-serif;
   font-weight: normal;
+  font-size: inherit;
 }
 
 *, *::after, *::before {
@@ -23,6 +24,10 @@ body {
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
+}
+
+h1 {
+  font-size: 2rem;
 }
 
 canvas {
@@ -62,6 +67,10 @@ button:hover {
 .nav li, .disclaimer, .burger {
   position: relative;
   z-index: 1;
+}
+
+.nav a:not(:hover) {
+  color: black;
 }
 
 .nav, .disclaimer {
