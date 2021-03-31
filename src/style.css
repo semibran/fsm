@@ -22,6 +22,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;
+  overflow: hidden;
 }
 
 canvas {
@@ -44,22 +45,30 @@ a {
   text-decoration: none;
 }
 
-a:hover, button:hover {
+a:hover, button:not(.burger):hover {
   text-decoration: dotted underline;
 }
 
-nav button, .disclaimer {
-  position: relative;
-  z-index: 1;
-  font-size: 0.875rem;
-}
-
-nav button:hover {
+button:hover {
   cursor: pointer;
   color: blue;
 }
 
-nav button + button {
+.nav {
+  display: flex;
+  list-style: none;
+}
+
+.nav li, .disclaimer, .burger {
+  position: relative;
+  z-index: 1;
+}
+
+.nav, .disclaimer {
+  font-size: 0.875rem;
+}
+
+.nav li + li {
   padding-left: 8px;
   border-left: thin solid black;
   margin-left: 8px;

@@ -26,6 +26,26 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
+import { h, text, patch } from "https://unpkg.com/superfine"
+
+var canvas;
+var nodeRadius = 30;
+var nodes = [];
+var links = [];
+
+var cursorVisible = true;
+var snapToPadding = 6; // pixels
+var hitTargetPadding = 6; // pixels
+var selectedObject = null; // either a Link or a Node
+var currentLink = null; // a Link
+var movingObject = false;
+var originalClick;
+
+var caretTimer;
+var caretVisible = true;
+var deltaMouseX = 0
+var deltaMouseY = 0
+
 function StartLink(node, start) {
   this.node = node;
   this.deltaX = 0;
@@ -538,7 +558,7 @@ function canvasHasFocus() {
 }
 
 function drawText(c, originalText, x, y, angleOrNull, isSelected) {
-  text = convertLatexShortcuts(originalText);
+  var text = convertLatexShortcuts(originalText);
   c.font = '20px "Times New Roman", serif';
   var width = c.measureText(text).width;
 
@@ -573,27 +593,14 @@ function drawText(c, originalText, x, y, angleOrNull, isSelected) {
   }
 }
 
-var caretTimer;
-var caretVisible = true;
-
 function resetCaret() {
   clearInterval(caretTimer);
-  caretTimer = setInterval('caretVisible = !caretVisible; draw()', 500);
+  caretTimer = setInterval(() => {
+    caretVisible = !caretVisible
+    draw()
+  }, 500);
   caretVisible = true;
 }
-
-var canvas;
-var nodeRadius = 30;
-var nodes = [];
-var links = [];
-
-var cursorVisible = true;
-var snapToPadding = 6; // pixels
-var hitTargetPadding = 6; // pixels
-var selectedObject = null; // either a Link or a Node
-var currentLink = null; // a Link
-var movingObject = false;
-var originalClick;
 
 function drawUsing(c) {
   c.clearRect(0, 0, canvas.width, canvas.height);
@@ -652,17 +659,34 @@ function snapNode(node) {
   }
 }
 
-const view = () =>
+const state = {
+  hidden: false
+}
+
+const ToggleText = (state) =>
+  ({ ...state, hidden: !state.hidden })
+
+const view = (state) =>
   h('div', { id: 'root' }, [
     h('header', {}, [
       h('h1', {}, text('Finite State Machine Designer')),
-      h('nav', { class: 'menu' }, [
-        h('button', {}, text('Hide text')),
-        h('button', {}, text('Download PNG')),
-        h('button', {}, text('Download SVG'))
+      h('ul', { class: 'nav' }, [
+        h('li', {}, [
+          h('button', { onclick: () => render(ToggleText(state)) },
+            state.hidden ? text('Show text') : text('Hide text'))
+        ]),
+        h('li', {}, [
+          h('button', {}, text('Export PNG'))
+        ]),
+        h('li', {}, [
+          h('button', {}, text('Export SVG'))
+        ]),
+        h('li', {}, [
+          h('button', {}, text('Export JSON'))
+        ])
       ])
     ]),
-    h('footer', {}, [
+    !state.hidden && h('footer', {}, [
       h('ul', { class: 'instructions' }, [
         h('li', {}, [h('strong', {}, text('Add a state:')),
           text(' double-click on the canvas')]),
@@ -689,17 +713,16 @@ const view = () =>
     h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
   ])
 
-const render = () => {
+const render = (state) => {
   const root = document.getElementById('root')
-  patch(root, view())
-
+  patch(root, view(state))
   canvas = document.getElementById('canvas')
-  restoreBackup();
-  draw();
 }
 
 window.onload = function () {
-  render()
+  render(state)
+  restoreBackup();
+  draw();
 
   canvas.onmousedown = function (e) {
     var mouse = crossBrowserRelativeMousePos(e);
