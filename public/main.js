@@ -397,6 +397,8 @@ function restoreBackup() {
     return;
   }
 
+  console.log('restoring', localStorage.fsm)
+
   try {
     var backup = JSON.parse(localStorage['fsm']);
 
@@ -489,7 +491,6 @@ function saveBackup() {
   }
 
   const data = JSON.stringify(backup)
-  render(UpdateBlob(state, data))
   localStorage.fsm = data;
 }
 
@@ -698,6 +699,34 @@ const exportSVG = () => {
   download(url, filename)
 }
 
+const importJSON = (evt) => {
+  const input = evt.target
+  const file = input.files[0]
+  const reader = new FileReader()
+  reader.readAsText(file)
+  reader.onload = (evt) => {
+    useJSON(evt)
+    input.value = ''
+  }
+}
+
+const useJSON = (evt) => {
+  canvas.getContext('2d').clearRect(0, 0, window.innerWidth, window.innerHeight)
+  localStorage.fsm = evt.target.result
+  restoreBackup()
+  draw()
+}
+
+const clearDiagram = () => {
+  const ready = confirm('Are you sure you would like to clear the diagram? All unsaved changes will be lost.')
+  console.log(ready)
+  if (!ready) return
+  canvas.getContext('2d').clearRect(0, 0, window.innerWidth, window.innerHeight)
+  localStorage.fsm = ''
+  nodes.length = 0
+  links.length = 0
+}
+
 const view = (state) =>
   h('div', { id: 'root' }, [
     h('header', {}, [
@@ -708,7 +737,17 @@ const view = (state) =>
             state.hidden ? text('Show text') : text('Hide text'))
         ]),
         h('li', {}, [
-          h('button', {}, text('Import JSON'))
+          h('button', { onclick: clearDiagram }, text('Clear diagram'))
+        ]),
+        h('li', {}, [
+          h('label', { for: 'import', class: 'button' }, text('Import JSON')),
+          h('input', {
+            id: 'import',
+            type: 'file',
+            accept: 'application/json',
+            multiple: false,
+            onchange: importJSON
+          }, text('Import JSON'))
         ]),
         h('li', {}, [
           h('a', { href: state.blob, target: '_blank' }, text('View JSON'))
@@ -749,10 +788,13 @@ const view = (state) =>
   ])
 
 const render = (state) => {
+  state = UpdateBlob(state, localStorage.fsm)
+
   const root = document.getElementById('root')
   patch(root, view(state))
 
   canvas = document.getElementById('canvas')
+  draw();
   window.onresize = () => render(state)
 }
 

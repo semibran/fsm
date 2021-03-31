@@ -50,13 +50,17 @@ a {
   text-decoration: none;
 }
 
-a:hover, button:not(.burger):hover {
+a:hover, button:hover, .button:hover {
   text-decoration: dotted underline;
 }
 
-button:hover {
+button:hover, .button:hover {
   cursor: pointer;
   color: blue;
+}
+
+input[type='file'] {
+  display: none;
 }
 
 .nav {
