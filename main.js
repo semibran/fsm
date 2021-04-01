@@ -894,6 +894,7 @@ window.onload = function () {
     if (selectedObject == null) {
       selectedObject = new Node(mouse.x, mouse.y);
       nodes.push(selectedObject);
+      selectedObjects = [selectedObject]
       resetCaret();
       draw();
     } else if (selectedObject instanceof Node) {
@@ -981,7 +982,7 @@ document.onkeydown = function (e) {
     // don't read keystrokes when other things have focus
     return true;
   } else if (key == 8) { // backspace key
-    if (selectedObject != null && selectedObject.text) {
+    if (selectedObject && 'text' in selectedObject) {
       selectedObject.text = selectedObject.text.substr(0, selectedObject.text.length - 1);
       resetCaret();
       draw();
@@ -1023,7 +1024,7 @@ document.onkeypress = function (e) {
   if (!canvasHasFocus()) {
     // don't read keystrokes when other things have focus
     return true;
-  } else if (key >= 0x20 && key <= 0x7E && !e.metaKey && !e.altKey && !e.ctrlKey && selectedObject != null && selectedObject.text) {
+  } else if (key >= 0x20 && key <= 0x7E && !e.metaKey && !e.altKey && !e.ctrlKey && selectedObject && 'text' in selectedObject) {
     selectedObject.text += String.fromCharCode(key);
     resetCaret();
     draw();
