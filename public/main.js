@@ -970,6 +970,7 @@ window.onload = function () {
           }
         })
       }
+      dispatch(actions.setPath, [])
       resetCaret();
     } else if (shift) {
       currentLink = new TemporaryLink(mouse, mouse);
@@ -1097,20 +1098,19 @@ document.onkeydown = function (e) {
     // backspace is a shortcut for the back button, but do NOT want to change pages
     return false;
   } else if (key == 46) { // delete key
-    if (selectedObject != null) {
+    selectedObjects.forEach((obj) => {
       for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i] == selectedObject) {
+        if (nodes[i] == obj) {
           nodes.splice(i--, 1);
         }
       }
       for (var i = 0; i < links.length; i++) {
-        if (links[i] == selectedObject || links[i].node == selectedObject || links[i].nodeA == selectedObject || links[i].nodeB == selectedObject) {
+        if (links[i] == obj || links[i].node == obj || links[i].nodeA == obj || links[i].nodeB == obj) {
           links.splice(i--, 1);
         }
       }
-      selectedObject = null;
-      draw();
-    }
+    })
+    draw();
   }
 };
 
