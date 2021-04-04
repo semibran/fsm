@@ -801,6 +801,7 @@ const runDiagram = (state) => {
     }
   }
 
+  selectedObjects.length = 0
   dispatch(actions.setPath, path)
   draw()
 }
