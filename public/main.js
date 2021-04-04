@@ -665,10 +665,9 @@ function rectFromPoints({ x: x1, y: y1 }, { x: x2, y: y2 }) {
 }
 
 function draw() {
-  drawUsing(canvas.getContext('2d'));
-  saveBackup();
-  updateBlob(localStorage.fsm)
-  render(state)
+  drawUsing(canvas.getContext('2d'))
+  saveBackup()
+  dispatch(actions.updateBlob)
 }
 
 function selectObject(x, y) {
@@ -699,26 +698,24 @@ function snapNode(node) {
   }
 }
 
-let blob = null
-const state = { hidden: false }
-
-const ToggleText = (state) =>
-  ({ ...state, hidden: !state.hidden })
-
 const updateBlob = (data) =>
   blob = URL.createObjectURL(new Blob([data], { type: 'application/json' }))
 
-const download = (url, filename) => {
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.addEventListener('click', function onclick () {
-    requestAnimationFrame(() => {
-      URL.revokeObjectURL(url)
-      a.removeEventListener('click', onclick)
-    })
-  })
-  a.click()
+const app = (actions) => {
+  let state = actions.init()
+  const listeners = []
+
+  const dispatch = (action, data) => {
+    state = action(state, data)
+    listeners.forEach((listener) => listener(state))
+  }
+
+  const listen = (fn) => {
+    fn(state)
+    listeners.push(fn)
+  }
+
+  return { dispatch, listen }
 }
 
 const exportSVG = () => {
@@ -758,14 +755,29 @@ const clearDiagram = () => {
   draw()
 }
 
+const actions = {
+  init: () =>
+    ({ help: true, menu: null }),
+  toggleHelp: (state) =>
+    ({ ...state, help: !state.help }),
+  openRun: (state) =>
+    ({ ...state, menu: 'run' }),
+  closeMenu: (state) =>
+    ({ ...state, menu: null }),
+  updateBlob: (state) => ({
+    ...state,
+    blob: URL.createObjectURL(new Blob([localStorage.fsm], { type: 'application/json' }))
+  })
+}
+
 const view = (state) =>
   h('div', { id: 'root' }, [
     h('header', {}, [
       h('h1', {}, text('Finite State Machine Designer')),
       h('ul', { class: 'nav' }, [
         h('li', {}, [
-          h('button', { onclick: () => render(Object.assign(state, ToggleText(state))) },
-            state.hidden ? text('Show text') : text('Hide text'))
+          h('button', { onclick: () => dispatch(actions.toggleHelp) },
+            state.help ? text('Hide text') : text('Show text'))
         ]),
         h('li', {}, [
           h('button', { onclick: clearDiagram }, text('Clear diagram'))
@@ -778,7 +790,7 @@ const view = (state) =>
             accept: 'application/json',
             multiple: false,
             onchange: importJSON
-          }, text('Import JSON'))
+          })
         ]),
         h('li', {}, [
           h('a', { href: blob, target: '_blank' }, text('View JSON'))
@@ -786,12 +798,24 @@ const view = (state) =>
         h('li', {}, [
           h('button', { onclick: exportSVG }, text('Export SVG'))
         ]),
-        // h('li', {}, [
-        //   h('button', {}, text('Export PNG'))
-        // ])
+        h('li', {}, [
+          state.menu === 'run'
+            ? h('button', { class: 'button -play', onclick: () => dispatch(actions.closeMenu) }, [
+                h('span', { class: 'icon material-icons-round'}, text('close')),
+                h('span', {}, text('Close'))
+              ])
+            : h('button', { class: 'button -play', onclick: () => dispatch(actions.openRun) }, [
+                h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
+                h('span', {}, text('Run'))
+              ]),
+          state.menu === 'run' && h('div', { class: 'menu -run' }, [
+            h('input', { tabindex: -1, placeholder: 'Input string' }),
+            h('button', {}, text('Run'))
+          ])
+        ])
       ])
     ]),
-    !state.hidden && h('footer', {}, [
+    state.help && h('footer', {}, [
       h('ul', { class: 'instructions' }, [
         h('li', {}, [h('strong', {}, text('Add a state:')),
           text(' double-click on the canvas')]),
@@ -818,8 +842,14 @@ const view = (state) =>
     h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
   ])
 
+const { dispatch, listen } = app(actions)
+
+let blob = null
+const root = document.getElementById('root')
+updateBlob(localStorage.fsm)
+restoreBackup()
+
 const render = (state) => {
-  const root = document.getElementById('root')
   patch(root, view(state))
 
   canvas = document.getElementById('canvas')
@@ -829,10 +859,23 @@ const render = (state) => {
   }
 }
 
+listen(render)
+
+const download = (url, filename) => {
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.addEventListener('click', function onclick () {
+    requestAnimationFrame(() => {
+      URL.revokeObjectURL(url)
+      a.removeEventListener('click', onclick)
+    })
+  })
+  a.click()
+}
+
+
 window.onload = function () {
-  updateBlob(localStorage.fsm)
-  restoreBackup();
-  render(state)
   draw()
 
   canvas.onmousedown = function (e) {

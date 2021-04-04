@@ -28,6 +28,7 @@ body {
 
 h1 {
   font-size: 2rem;
+  line-height: 1.5;
 }
 
 canvas {
@@ -68,6 +69,10 @@ input[type='file'] {
   list-style: none;
 }
 
+.nav * {
+  line-height: 1;
+}
+
 .nav li, .disclaimer, .burger {
   position: relative;
   z-index: 1;
@@ -87,6 +92,24 @@ input[type='file'] {
   margin-left: 8px;
 }
 
+.nav button {
+  display: flex;
+}
+
+.nav button .icon {
+  font-size: inherit;
+  margin-right: 4px;
+}
+
+.nav .button.-play:hover {
+  color: green;
+  text-decoration: none;
+}
+
+.nav .button.-play:hover span:not(.icon) {
+  text-decoration: dotted underline;
+}
+
 .instructions {
   padding: 0.5rem 2rem;
   line-height: 1.5;
@@ -95,4 +118,50 @@ input[type='file'] {
 
 strong {
   font-weight: bold;
+}
+
+.menu {
+  background: black;
+  color: white;
+  padding: 12px;
+  position: absolute;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+
+.menu::before {
+  content: '';
+  display: block;
+  border: 8px solid transparent;
+  border-bottom-color: black;
+  position: absolute;
+  bottom: 100%;
+}
+
+.menu input {
+  border: thin solid gray;
+  border-radius: 4px;
+  padding: 8px;
+  outline: 0;
+}
+
+.menu input:focus {
+  border-color: white;
+}
+
+.menu input:placeholder-shown + button {
+  background: gray;
+  pointer-events: none;
+}
+
+.menu button {
+  background: white;
+  color: black;
+  justify-content: center;
+  font-weight: bold;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 8px;
 }
