@@ -618,18 +618,39 @@ function resetCaret() {
 }
 
 function drawUsing(c) {
+  const state = getState()
+
   c.clearRect(0, 0, canvas.width, canvas.height);
   c.save();
   c.translate(0.5, 0.5);
 
+  const getColor = (item) => {
+    if (state.path.includes(item)) {
+      const lastItem = state.path[state.path.length - 1]
+      if (item === lastItem && item.isAcceptState) {
+        return 'green'
+      } else if (item === lastItem && !item.isAcceptState) {
+        return 'maroon'
+      } else {
+        return 'navy'
+      }
+    }
+
+    if (selectedObjects.includes(item)) {
+      return 'blue'
+    }
+
+    return 'black'
+  }
+
   for (var i = 0; i < nodes.length; i++) {
     c.lineWidth = 1;
-    c.fillStyle = c.strokeStyle = selectedObjects.includes(nodes[i]) ? 'blue' : 'black';
+    c.fillStyle = c.strokeStyle = getColor(nodes[i])
     nodes[i].draw(c);
   }
   for (var i = 0; i < links.length; i++) {
     c.lineWidth = 1;
-    c.fillStyle = c.strokeStyle = selectedObjects.includes(links[i]) ? 'blue' : 'black';
+    c.fillStyle = c.strokeStyle = getColor(links[i])
     links[i].draw(c);
   }
   if (currentLink != null) {
@@ -715,7 +736,9 @@ const app = (actions) => {
     listeners.push(fn)
   }
 
-  return { dispatch, listen }
+  const getState = () => state
+
+  return { dispatch, listen, getState }
 }
 
 const exportSVG = () => {
@@ -755,19 +778,50 @@ const clearDiagram = () => {
   draw()
 }
 
+const runDiagram = (state) => {
+  if (!state.input) {
+    return alert('DiagramError: No input given')
+  }
+
+  const start = links.find((link) => link instanceof StartLink)
+  if (!start || !start.node) {
+    return alert('DiagramError: No start node found')
+  }
+
+  let node = start.node
+  const path = [start, node]
+  for (let i = 0; i < state.input.length; i++) {
+    const char = state.input[i]
+    const link = links.find((link) => (link.node === node || link.nodeA === node) && link.text === char)
+    if (link) {
+      node = link.node || link.nodeB
+      path.push(link, node)
+    } else {
+      return alert(`DiagramError: No link for input[${i}] = '${char}' from node '${node.text}'`)
+    }
+  }
+
+  dispatch(actions.setPath, path)
+  draw()
+}
+
 const actions = {
   init: () =>
-    ({ help: true, menu: null }),
+    ({ help: true, menu: null, input: '', error: '', path: [] }),
   toggleHelp: (state) =>
     ({ ...state, help: !state.help }),
   openRun: (state) =>
-    ({ ...state, menu: 'run' }),
+    ({ ...state, menu: 'run', path: [] }),
   closeMenu: (state) =>
     ({ ...state, menu: null }),
   updateBlob: (state) => ({
     ...state,
     blob: URL.createObjectURL(new Blob([localStorage.fsm], { type: 'application/json' }))
-  })
+  }),
+  changeInput: (state, input) =>
+    ({ ...state, input }),
+  setPath: (state, path) =>
+    ({ ...state, path })
 }
 
 const view = (state) =>
@@ -809,8 +863,15 @@ const view = (state) =>
                 h('span', {}, text('Run'))
               ]),
           state.menu === 'run' && h('div', { class: 'menu -run' }, [
-            h('input', { tabindex: -1, placeholder: 'Input string' }),
-            h('button', {}, text('Run'))
+            h('input', {
+              onchange: (evt) => dispatch(actions.changeInput, evt.target.value),
+              tabindex: -1,
+              placeholder: 'Input string'
+            }),
+            h('button', { class: '-play', onclick: () => runDiagram(state) }, [
+              h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
+              h('strong', {}, text('Run'))
+            ])
           ])
         ])
       ])
@@ -842,7 +903,7 @@ const view = (state) =>
     h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
   ])
 
-const { dispatch, listen } = app(actions)
+const { dispatch, listen, getState } = app(actions)
 
 let blob = null
 const root = document.getElementById('root')
@@ -939,6 +1000,7 @@ window.onload = function () {
       nodes.push(selectedObject);
       selectedObjects = [selectedObject]
       resetCaret();
+      dispatch(actions.setPath, [])
       draw();
     } else if (selectedObject instanceof Node) {
       selectedObject.isAcceptState = !selectedObject.isAcceptState;
