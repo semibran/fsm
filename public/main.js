@@ -872,7 +872,7 @@ const FileMenu = (state) =>
       h('input', {
         id: 'import',
         type: 'file',
-        accept: 'application/json',
+        accept: '.txt,application/json',
         multiple: false,
         onchange: importJSON
       })
