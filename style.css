@@ -103,10 +103,17 @@ input[type='file'] {
 
 button.-play:hover {
   color: green;
+}
+
+.button.-play:hover {
   text-decoration: none;
 }
 
-button.-play:hover *:not(.icon) {
+.button.-validate:hover {
+  text-decoration: none;
+}
+
+.button:hover *:not(.icon) {
   text-decoration: dotted underline;
 }
 

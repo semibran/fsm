@@ -806,6 +806,29 @@ const runDiagram = (state) => {
   draw()
 }
 
+const validateDiagram = (state) => {
+  const errors = []
+
+  const start = links.find((link) => link instanceof StartLink)
+  if (!start || !start.node) {
+    errors.push('· No start node found')
+  }
+
+  for (const node of nodes) {
+    const outlinks = links.filter((link) => !(link instanceof StartLink) && (link.node === node || link.nodeA === node))
+    if (outlinks.length !== 2) {
+      errors.push(`· State '${node.text}' expects 2 outgoing links (found ${outlinks.length})`)
+    }
+  }
+
+  if (errors.length) {
+    alert(`Found ${errors.length} error${errors.length === 1 ? '' : 's'}:\n`
+      + errors.join('\n'))
+  } else {
+    alert('No errors found!')
+  }
+}
+
 const actions = {
   init: () =>
     ({ help: true, menu: null, input: '', error: '', path: [] }),
@@ -869,9 +892,15 @@ const view = (state) =>
               tabindex: -1,
               placeholder: 'Input string'
             }),
-            h('button', { class: '-play', onclick: () => runDiagram(state) }, [
-              h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
-              h('strong', {}, text('Run'))
+            h('div', { class: 'buttons' }, [
+              h('button', { class: 'button -play', onclick: () => runDiagram(state) }, [
+                h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
+                h('strong', {}, text('Run'))
+              ]),
+              h('button', { class: 'button -validate', onclick: () => validateDiagram(state) }, [
+                h('span', { class: 'icon material-icons-round'}, text('check')),
+                h('strong', {}, text('Validate'))
+              ])
             ])
           ])
         ])
