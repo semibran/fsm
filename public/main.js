@@ -819,7 +819,16 @@ const validateDiagram = (state) => {
 
   for (const node of nodes) {
     const outlinks = links.filter((link) => !(link instanceof StartLink) && (link.node === node || link.nodeA === node))
-    if (outlinks.length !== 2) {
+
+    if (!outlinks.find((link) => link.text === '0')) {
+      errors.push(`· State '${node.text}' is missing an outgoing '0' link`)
+    }
+
+    if (!outlinks.find((link) => link.text === '1')) {
+      errors.push(`· State '${node.text}' is missing an outgoing '1' link`)
+    }
+
+    if (outlinks.length > 2) {
       errors.push(`· State '${node.text}' expects 2 outgoing links (found ${outlinks.length})`)
     }
   }
