@@ -28,6 +28,9 @@
 
 import { h, text, patch } from "https://unpkg.com/superfine"
 
+const MIN_NODE_RADIUS = 20
+const MAX_NODE_RADIUS = 50
+
 var canvas;
 var nodeRadius = 30;
 var nodes = [];
@@ -829,6 +832,11 @@ const validateDiagram = (state) => {
   }
 }
 
+const setNodeRadius = (newNodeRadius) => {
+  nodeRadius = newNodeRadius
+  draw()
+}
+
 const actions = {
   init: () =>
     ({ help: true, menu: null, input: '', error: '', path: [] }),
@@ -874,8 +882,15 @@ const ViewMenu = (state) =>
       h('button', { class: 'button', onclick: () => dispatch(actions.toggleHelp) },
         state.help ? text('Hide help text') : text('Show help text'))
     ]),
-    h('li', {}, [
-      h('label', {}, text('Change node radius'))
+    h('li', { class: 'group -input' }, [
+      h('label', {}, text('Node size')),
+      h('input', {
+        type: 'range',
+        min: MIN_NODE_RADIUS,
+        max: MAX_NODE_RADIUS,
+        value: nodeRadius,
+        oninput: (evt) => setNodeRadius(evt.target.value)
+      })
     ])
   ])
 
