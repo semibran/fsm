@@ -79,14 +79,14 @@ input[type='file'] {
 }
 
 .nav a:not(:hover) {
-  color: black;
+  color: inherit;
 }
 
 .nav, .disclaimer {
   font-size: 0.875rem;
 }
 
-.nav li + li {
+.nav > li + li {
   padding-left: 8px;
   border-left: thin solid black;
   margin-left: 8px;
@@ -130,10 +130,60 @@ strong {
 .menu {
   background: black;
   color: white;
-  padding: 12px;
+  padding: 16px 12px;
   position: absolute;
   border-radius: 4px;
   margin-top: 16px;
+}
+
+ul.menu {
+  list-style: none;
+  padding: 4px 0;
+}
+
+ul.menu li {
+  padding: 8px 32px 8px 24px;
+}
+
+ul.menu li.group {
+  padding-top: 12px;
+  border-top: thin solid gray;
+}
+
+ul.menu li.group input {
+  margin-top: 8px;
+}
+
+ul.menu li:not(.group), ul.menu label {
+  white-space: nowrap;
+}
+
+ul.menu li:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+ul.menu li:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+ul.menu li:not(.group):hover {
+  cursor: pointer;
+  background: blue;
+  text-decoration: dotted underline;
+}
+
+ul.menu li .button:hover {
+  color: white;
+}
+
+ul.menu li  {
+  display: block;
+}
+
+ul.menu li + li {
+  /* border-top: thin solid gray; */
 }
 
 .menu::before {
@@ -142,26 +192,27 @@ strong {
   border: 8px solid transparent;
   border-bottom-color: black;
   position: absolute;
+  left: 12px;
   bottom: 100%;
 }
 
-.menu input {
+.menu > input {
   border: thin solid gray;
   border-radius: 4px;
   padding: 8px;
   outline: 0;
 }
 
-.menu input:focus {
+.menu > input:focus {
   border-color: white;
 }
 
-.menu input:placeholder-shown + button {
+.menu > input:placeholder-shown + button {
   background: gray;
   pointer-events: none;
 }
 
-.menu button {
+.menu .buttons button {
   background: white;
   color: black;
   justify-content: center;
