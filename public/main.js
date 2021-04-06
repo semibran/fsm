@@ -526,7 +526,8 @@ function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
 }
 
 function fixed(number, digits) {
-  return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+  console.log(number)
+  return parseInt(number).toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 var greekLetterNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'];
