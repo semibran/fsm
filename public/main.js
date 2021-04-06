@@ -834,8 +834,8 @@ const actions = {
     ({ help: true, menu: null, input: '', error: '', path: [] }),
   toggleHelp: (state) =>
     ({ ...state, help: !state.help }),
-  openRun: (state) =>
-    ({ ...state, menu: 'run', path: [] }),
+  openMenu: (state, menu) =>
+    ({ ...state, menu, path: [] }),
   closeMenu: (state) =>
     ({ ...state, menu: null }),
   updateBlob: (state) => ({
@@ -848,33 +848,70 @@ const actions = {
     ({ ...state, path })
 }
 
+const FileMenu = (state) =>
+  h('ul', { class: 'menu -file' }, [
+    h('li', {}, [
+      h('label', { for: 'import', class: 'button' }, text('Import JSON...')),
+      h('input', {
+        id: 'import',
+        type: 'file',
+        accept: 'application/json',
+        multiple: false,
+        onchange: importJSON
+      })
+    ]),
+    h('li', {}, [
+      h('a', { class: 'button', href: blob, target: '_blank' }, text('View JSON'))
+    ]),
+    h('li', {}, [
+      h('a', { class: 'button', onclick: exportSVG }, text('Export SVG'))
+    ])
+  ])
+
+const ViewMenu = (state) =>
+  h('ul', { class: 'menu -view' }, [
+    h('li', {}, [
+      h('button', { class: 'button', onclick: () => dispatch(actions.toggleHelp) },
+        state.help ? text('Hide help text') : text('Show help text'))
+    ]),
+    h('li', {}, [
+      h('label', {}, text('Change node radius'))
+    ])
+  ])
+
+const RunMenu = (state) =>
+  h('div', { class: 'menu -run' }, [
+    h('input', {
+      onchange: (evt) => dispatch(actions.changeInput, evt.target.value),
+      tabindex: -1,
+      placeholder: 'Input string, e.g. 1010'
+    }),
+    h('div', { class: 'buttons' }, [
+      h('button', { class: 'button -play', onclick: () => runDiagram(state) }, [
+        h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
+        h('strong', {}, text('Run'))
+      ]),
+      h('button', { class: 'button -validate', onclick: () => validateDiagram(state) }, [
+        h('span', { class: 'icon material-icons-round'}, text('check')),
+        h('strong', {}, text('Validate'))
+      ])
+    ])
+  ])
+
 const view = (state) =>
   h('div', { id: 'root' }, [
     h('header', {}, [
       h('h1', {}, text('Finite State Machine Designer')),
       h('ul', { class: 'nav' }, [
         h('li', {}, [
-          h('button', { onclick: () => dispatch(actions.toggleHelp) },
-            state.help ? text('Hide text') : text('Show text'))
+          h('button', { onclick: () => dispatch(actions.openMenu, 'file') },
+            text('File')),
+          state.menu === 'file' && FileMenu(state)
         ]),
         h('li', {}, [
-          h('button', { onclick: clearDiagram }, text('Clear diagram'))
-        ]),
-        h('li', {}, [
-          h('label', { for: 'import', class: 'button' }, text('Import JSON')),
-          h('input', {
-            id: 'import',
-            type: 'file',
-            accept: 'application/json',
-            multiple: false,
-            onchange: importJSON
-          })
-        ]),
-        h('li', {}, [
-          h('a', { href: blob, target: '_blank' }, text('View JSON'))
-        ]),
-        h('li', {}, [
-          h('button', { onclick: exportSVG }, text('Export SVG'))
+          h('button', { onclick: () => dispatch(actions.openMenu, 'view') },
+            text('View')),
+          state.menu === 'view' && ViewMenu(state)
         ]),
         h('li', {}, [
           state.menu === 'run'
@@ -882,27 +919,11 @@ const view = (state) =>
                 h('span', { class: 'icon material-icons-round'}, text('close')),
                 h('span', {}, text('Close'))
               ])
-            : h('button', { class: 'button -play', onclick: () => dispatch(actions.openRun) }, [
+            : h('button', { class: 'button -play', onclick: () => dispatch(actions.openMenu, 'run') }, [
                 h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
                 h('span', {}, text('Run'))
               ]),
-          state.menu === 'run' && h('div', { class: 'menu -run' }, [
-            h('input', {
-              onchange: (evt) => dispatch(actions.changeInput, evt.target.value),
-              tabindex: -1,
-              placeholder: 'Input string'
-            }),
-            h('div', { class: 'buttons' }, [
-              h('button', { class: 'button -play', onclick: () => runDiagram(state) }, [
-                h('span', { class: 'icon material-icons-round'}, text('play_arrow')),
-                h('strong', {}, text('Run'))
-              ]),
-              h('button', { class: 'button -validate', onclick: () => validateDiagram(state) }, [
-                h('span', { class: 'icon material-icons-round'}, text('check')),
-                h('strong', {}, text('Validate'))
-              ])
-            ])
-          ])
+          state.menu === 'run' && RunMenu(state)
         ])
       ])
     ]),
@@ -930,7 +951,12 @@ const view = (state) =>
         h('a', { href: 'https://opensource.org/licenses/MIT', target: '_blank' }, text('MIT License'))
       ])
     ]),
-    h('canvas', { id: 'canvas', width: window.innerWidth, height: window.innerHeight }, [])
+    h('canvas', {
+      id: 'canvas',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      onclick: () => dispatch(actions.closeMenu)
+    }, [])
   ])
 
 const { dispatch, listen, getState } = app(actions)
